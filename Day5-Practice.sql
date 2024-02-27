@@ -38,13 +38,35 @@ max(issued_amount)-min(issued_amount) as "Difference"
 FROM monthly_cards_issued
 group by card_name
 order by max(issued_amount)-min(issued_amount) desc;
---EX8 (chưa giải xong)
+--EX8
 SELECT 
 manufacturer,
-count(drug) as cout_of_lost,
-abs(total_sales-cogs) as total_losses
+count(drug) as drug_count,
+sum(cogs-total_sales) as total_loss
 FROM pharmacy_sales
+where cogs>total_sales
 group by manufacturer
-having total_sales-cogs <0
-order by abs(total_sales-cogs) desc;
+order by total_loss desc;
+--EX9
+select * from cinema
+where ID%2=1
+and description not like '%boring%'
+order by rating desc;
+--EX10
+select 
+teacher_id,
+count(distinct subject_id) as "cnt"
+from teacher
+group by teacher_id;
+--EX11
+select
+user_id,
+count(follower_id) as "followers_count"
+from Followers
+group by user_id
+order by user_id;
+--EX12
+select class from Courses
+group by class
+having count(student)>=5;
 
