@@ -41,5 +41,26 @@ tweet_id as tweet_id
 from tweets
 where length(content)>15;
 --EX7
-
-
+select 
+activity_date as "day",
+count(distinct user_id) as active_users
+from activity
+where activity_date between (cast('2019-07-27' as date) -30) and cast('2019-07-27' as date)
+group by activity_date;
+--EX8
+select 
+count(id)
+from employees
+where extract(month from joining_date) between 1 and 7
+and extract(year from joining_date)=2022;
+--EX9
+select
+position('a' in 'Amitah')
+from worker
+where first_name='Amitah';
+--EX10
+select
+id,
+substring(title from length(winery)+2 for 4)
+from winemag_p2
+where country='Macedonia';
