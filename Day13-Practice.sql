@@ -9,34 +9,7 @@ count(company_id)
 from count_tbl
 where count_job>=2;
 --EX2:
-WITH CTE AS
-(
-SELECT A.category,A.product,sum(A.spend) total_spend
-FROM product_spend A
-WHERE EXTRACT(Year FROM transaction_date) = 2022
-GROUP BY A.category,A.product
-)
-SELECT A.category,A.product,A.total_spend
-FROM CTE A,CTE B
-WHERE
-A.category=B.Category
-AND A.total_spend<=B.total_spend
-group by A.category,A.product,A.total_spend
-having count(*)<3
-order by A.category ASC,A.total_spend desc
 
-with total AS
-(select
-category,product,
-sum(spend) as total_spend
-from product_spend
-where extract(year FROM	transaction_date)=2022
-group by category,product)
-SELECT
-total.category,total.product,total.total_spend
-from total as tbl1
-join total as tbl2 
-on tbl1.category=tbl2.category;
 
 --EX3:
 with call_record AS
@@ -114,16 +87,67 @@ join tbl1 on tbl1.month=tbl2.month and tbl2.country=tbl1.country
 group by tbl2.month,tbl2.country,tbl1.approved_count,tbl1.approved_total_amount;
 
 --EX7:
-with tbl1 as
-(select product_id, min(year) as min_year from sales group by product_id)
-
-select distinct sales.product_id,
-sales.year as first_year,
-sales.quantity,
-sales.price
+select product_id,
+year as first_year,
+quantity,
+price
 from sales
-join tbl1 on tbl1.product_id=sales.product_id
-where sales.year in (select min_year from tbl1);
+where (product_id,year) in (select product_id,min(year) from sales group by product_id)
 
 --EX8:
+select customer_id
+from Customer
+group by customer_id
+having count(distinct product_key)=(select count(distinct product_key) from Product);
 
+--EX9:
+select employee_id
+from employees
+where manager_id not in (select employee_id from employees)
+and salary<30000
+order by employee_id;
+
+--EX10:
+with count_tbl AS
+(SELECT company_id,title,description,
+count(job_id) as count_job
+FROM job_listings
+group by company_id,title,description)
+select 
+count(distinct company_id)
+from count_tbl
+where count_job>=2;
+
+--EX11:
+with name_count as
+(select
+count(MovieRating.movie_id),
+Users.name as results
+from MovieRating
+join users on MovieRating.user_id=users.user_id
+group by Users.name
+order by count(MovieRating.movie_id) desc,Users.name
+limit(1)),
+highest_avg as
+(select 
+avg(MovieRating.rating),
+Movies.title as results
+from Movies
+join MovieRating on MovieRating.movie_id=Movies.movie_id
+where extract(year from MovieRating.created_at)=2020 and extract(month from MovieRating.created_at)=2
+group by Movies.title
+order by avg(MovieRating.rating) desc,Movies.title asc
+limit(1))
+select results from name_count
+union all
+select results from highest_avg;
+
+--EX12:
+with ID as (select requester_id as ID from RequestAccepted union all select accepter_id as ID from RequestAccepted)
+select 
+ID,
+count(*) as num
+from ID
+group by ID
+order by count(*) desc
+limit (1);
