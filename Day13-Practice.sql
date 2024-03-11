@@ -9,7 +9,22 @@ count(company_id)
 from count_tbl
 where count_job>=2;
 --EX2:
+with tbl1 AS
+(select
+category,product,
+sum(spend) as total_spend
+from product_spend
+where extract(year FROM	transaction_date)=2022
+group by category,product
+order by category,total_spend DESC),
 
+tbl2 as (select category, product,total_spend,
+RANK() over(PARTITION BY category order by total_spend DESC) as ranking
+from tbl1)
+
+select category, product, total_spend
+from tbl2
+where ranking <3;
 
 --EX3:
 with call_record AS
